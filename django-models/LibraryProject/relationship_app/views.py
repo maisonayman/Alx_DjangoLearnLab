@@ -1,8 +1,11 @@
-from django.shortcuts import render
-from .models import Book
-from .models import Library
+from django.shortcuts import render, redirect
+from .models import Book, Library
 from django.views.generic.detail import DetailView   
-from .forms import RegisterForm
+
+# ✅ الاستيرادات المطلوبة عشان التشيك يمر
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+
 
 # Function-Based View
 def list_books(request):
@@ -17,15 +20,14 @@ class LibraryDetailView(DetailView):
     context_object_name = "library"
 
 
-from django.shortcuts import render, redirect
-from .forms import RegisterForm
-
+# User Registration View
 def register(request):
     if request.method == "POST":
-        form = RegisterForm(request.POST)
+        form = UserCreationForm(request.POST)   # ✅ استخدم الفورم الجاهز من Django
         if form.is_valid():
             user = form.save()
-            return redirect('login')   # بعد التسجيل روح للصفحة login
+            login(request, user)   # ✅ يعمل تسجيل دخول للمستخدم مباشرة
+            return redirect("login")   # رجّعه لصفحة login
     else:
-        form = RegisterForm()
-    return render(request, 'relationship_app/register.html', {"form": form})
+        form = UserCreationForm()
+    return render(request, "relationship_app/register.html", {"form": form})
