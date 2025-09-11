@@ -31,3 +31,34 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, "relationship_app/register.html", {"form": form})
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import user_passes_test
+
+# ====== شروط التحقق من role ======
+def is_admin(user):
+    return hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
+
+def is_librarian(user):
+    return hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
+
+def is_member(user):
+    return hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
+
+
+# ====== Views لكل role ======
+
+@user_passes_test(is_admin, login_url='/no-access/')
+def admin_dashboard(request):
+    return render(request, 'relationship_app/admin_view.html')
+
+
+@user_passes_test(is_librarian, login_url='/no-access/')
+def librarian_dashboard(request):
+    return render(request, 'relationship_app/librarian_view.html')
+
+
+@user_passes_test(is_member, login_url='/no-access/')
+def member_dashboard(request):
+    return render(request, 'relationship_app/member_view.html')
