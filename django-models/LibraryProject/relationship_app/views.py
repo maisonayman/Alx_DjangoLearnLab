@@ -5,28 +5,30 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import user_passes_test, permission_required
 from .models import Book, Library
 
+# -------------------- Books Views --------------------
+
 # عرض كل الكتب (مفتوح للجميع)
 def list_books(request):
     books = Book.objects.all()
     return render(request, "relationship_app/list_books.html", {"books": books})
 
 
-# إضافة كتاب (محتاج permission can_add_book)
-@permission_required('relationship_app.can_add_book')
+# إضافة كتاب (محتاج permission add_book)
+@permission_required('relationship_app.add_book', raise_exception=True)
 def add_book(request):
-    # هنا أي كود لإضافة كتاب (manual أو form) 
+    # هنا أي كود لإضافة كتاب (manual أو form)
     return render(request, "relationship_app/add_book.html")
 
 
-# تعديل كتاب (محتاج permission can_change_book)
-@permission_required('relationship_app.can_change_book')
+# تعديل كتاب (محتاج permission change_book)
+@permission_required('relationship_app.change_book', raise_exception=True)
 def edit_book(request, book_id):
     # كود تعديل كتاب
     return render(request, "relationship_app/edit_book.html")
 
 
-# حذف كتاب (محتاج permission can_delete_book)
-@permission_required('relationship_app.can_delete_book')
+# حذف كتاب (محتاج permission delete_book)
+@permission_required('relationship_app.delete_book', raise_exception=True)
 def delete_book(request, book_id):
     # كود حذف كتاب
     return render(request, "relationship_app/delete_book.html")
