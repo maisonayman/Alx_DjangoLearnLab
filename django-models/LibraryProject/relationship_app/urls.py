@@ -9,8 +9,8 @@ from .member_view import member_dashboard
 
 urlpatterns = [
     path("add/books/", add_book, name="add_book"),
-    path("edit/books/<int:book_id>/",edit_book, name="edit_book"),
-    path("books/delete/<int:book_id>/", delete_book, name="delete_book"),
+    path("edit/books/",edit_book, name="edit_book"),
+    path("books/delete/", delete_book, name="delete_book"),
     path("books/", list_books, name="list_books"),  # function-based view
     path("library/<int:pk>/", LibraryDetailView.as_view(), name="library_detail"),  # class-based view
     path("register/", register, name="register"),  # function-based view
