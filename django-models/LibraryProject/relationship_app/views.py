@@ -5,43 +5,33 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import user_passes_test, permission_required
 from .models import Book, Library
 
-# -------------------- Books Views --------------------
 
-# عرض كل الكتب (مفتوح للجميع)
 def list_books(request):
     books = Book.objects.all()
     return render(request, "relationship_app/list_books.html", {"books": books})
 
 
-# إضافة كتاب (محتاج permission add_book)
-@permission_required('relationship_app.add_book', raise_exception=True)
+@permission_required('relationship_app.can_add_book', raise_exception=True)
 def add_book(request):
-    # هنا أي كود لإضافة كتاب (manual أو form)
     return render(request, "relationship_app/add_book.html")
 
 
-# تعديل كتاب (محتاج permission change_book)
-@permission_required('relationship_app.change_book', raise_exception=True)
+@permission_required('relationship_app.can_change_book', raise_exception=True)
 def edit_book(request, book_id):
-    # كود تعديل كتاب
     return render(request, "relationship_app/edit_book.html")
 
 
-# حذف كتاب (محتاج permission delete_book)
-@permission_required('relationship_app.delete_book', raise_exception=True)
+@permission_required('relationship_app.can_delete_book', raise_exception=True)
 def delete_book(request, book_id):
-    # كود حذف كتاب
     return render(request, "relationship_app/delete_book.html")
 
 
-# -------------------- Library View --------------------
 class LibraryDetailView(DetailView):
     model = Library
     template_name = "relationship_app/library_detail.html"
     context_object_name = "library"
 
 
-# -------------------- User Registration --------------------
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
@@ -54,7 +44,6 @@ def register(request):
     return render(request, "relationship_app/register.html", {"form": form})
 
 
-# -------------------- Roles Dashboards --------------------
 def is_admin(user):
     return hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
 
