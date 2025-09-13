@@ -1,42 +1,58 @@
-from django.shortcuts import render, redirect
-from .models import Book, Library
-from django.views.generic.detail import DetailView   
-
-# ✅ الاستيرادات المطلوبة عشان التشيك يمر
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic.detail import DetailView
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import user_passes_test, permission_required
+from .models import Book, Library
 
-
-# Function-Based View
+# عرض كل الكتب (مفتوح للجميع)
 def list_books(request):
     books = Book.objects.all()
     return render(request, "relationship_app/list_books.html", {"books": books})
 
 
-# Class-Based View
+# إضافة كتاب (محتاج permission can_add_book)
+@permission_required('relationship_app.can_add_book')
+def add_book(request):
+    # هنا أي كود لإضافة كتاب (manual أو form) 
+    return render(request, "relationship_app/add_book.html")
+
+
+# تعديل كتاب (محتاج permission can_change_book)
+@permission_required('relationship_app.can_change_book')
+def edit_book(request, book_id):
+    # كود تعديل كتاب
+    return render(request, "relationship_app/edit_book.html")
+
+
+# حذف كتاب (محتاج permission can_delete_book)
+@permission_required('relationship_app.can_delete_book')
+def delete_book(request, book_id):
+    # كود حذف كتاب
+    return render(request, "relationship_app/delete_book.html")
+
+
+# -------------------- Library View --------------------
 class LibraryDetailView(DetailView):
     model = Library
     template_name = "relationship_app/library_detail.html"
     context_object_name = "library"
 
 
-# User Registration View
+# -------------------- User Registration --------------------
 def register(request):
     if request.method == "POST":
-        form = UserCreationForm(request.POST)   # ✅ استخدم الفورم الجاهز من Django
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)   # ✅ يعمل تسجيل دخول للمستخدم مباشرة
-            return redirect("login")   # رجّعه لصفحة login
+            login(request, user)
+            return redirect("login")
     else:
         form = UserCreationForm()
     return render(request, "relationship_app/register.html", {"form": form})
 
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import user_passes_test
-
-# ====== شروط التحقق من role ======
+# -------------------- Roles Dashboards --------------------
 def is_admin(user):
     return hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
 
@@ -46,8 +62,6 @@ def is_librarian(user):
 def is_member(user):
     return hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
 
-
-# ====== Views لكل role ======
 
 @user_passes_test(is_admin, login_url='/no-access/')
 def admin_dashboard(request):
