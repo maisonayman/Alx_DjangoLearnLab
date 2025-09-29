@@ -3,7 +3,7 @@ from .models import Book
 from .serializers import BookSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated ,AllowAny
 from django.db.models import Q
-
+from django_filters import rest_framework
 
 class BookListView(generics.ListAPIView):
     serializer_class = BookSerializer
