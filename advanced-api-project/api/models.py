@@ -17,11 +17,7 @@ class Author(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=200)  # Book title
     publication_year = models.IntegerField()  # Year the book was published
-    author = models.ForeignKey(
-        Author,
-        on_delete=models.CASCADE,   # If an author is deleted, their books are deleted too
-        related_name='books'        # Allows reverse lookup: author.books.all()
-    )
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books')  # Allows reverse lookup: author.books.all()
 
     def __str__(self):
-        return self.title
+        return f"{self.title} by {self.author}"
