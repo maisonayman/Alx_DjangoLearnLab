@@ -3,39 +3,33 @@ from .models import Book
 from .serializers import BookSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated ,AllowAny
 from django.db.models import Q
-from django_filters import rest_framework
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 class BookListView(generics.ListAPIView):
+    """
+    API endpoint to list and filter/search/order books.
+    Supports:
+    - Filtering by title, author, publication_year
+    - Searching in title and author
+    - Ordering by title or publication_year
+    """
+    queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [AllowAny]
-    filter_backends = [filters.OrderingFilter]   # <-- أضف OrderingFilter
-    ordering_fields = ['title', 'publication_year']  # <-- الحقول اللي تسمح بالترتيب
-    ordering = ['title']  # <-- default ordering (مثلاً بالعنوان)
 
-    def get_queryset(self):
-        queryset = Book.objects.all()
+    # Enable filtering, searching, and ordering
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-        # Manual filters
-        title = self.request.query_params.get('title')
-        author = self.request.query_params.get('author')
-        year = self.request.query_params.get('publication_year')
+    # Filtering exact matches
+    filterset_fields = ['title', 'author', 'publication_year']
 
-        if title:
-            queryset = queryset.filter(title__icontains=title)
-        if author:
-            queryset = queryset.filter(author__icontains=author)
-        if year:
-            queryset = queryset.filter(publication_year=year)
+    # Searching (partial match)
+    search_fields = ['title', 'author']
 
-        # Search functionality (title OR author)
-        search = self.request.query_params.get('search')
-        if search:
-            queryset = queryset.filter(
-                Q(title__icontains=search) | Q(author__icontains=search)
-            )
-
-        return queryset
-
+    # Ordering
+    ordering_fields = ['title', 'publication_year']
+    ordering = ['title']  # default ordering
 
 
 
