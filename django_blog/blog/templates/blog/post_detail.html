@@ -7,10 +7,21 @@
   <h2>{{ object.title }}</h2>
   <p>{{ object.content }}</p>
   <p><small>by {{ object.author }} on {{ object.published_date }}</small></p>
+
+  <!-- 🏷️ Display Tags -->
+  {% if object.tags.all %}
+    <p class="tags">
+      <strong>Tags:</strong>
+      {% for tag in object.tags.all %}
+        <a href="{% url 'posts-by-tag' tag.name %}" class="tag-link">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
 </article>
 
 <hr>
 
+<!-- 💬 Comments Section -->
 <section id="comments">
   <h3>Comments ({{ comments|length }})</h3>
 
@@ -19,7 +30,7 @@
       {% for comment in comments %}
         <li>
           <p>{{ comment.content|linebreaksbr }}</p>
-          <p class="meta">— {{ comment.author.username }} • {{ comment.created_at }}</p>
+          <p class="meta">— {{ comment.author.username }} • {{ comment.created_at|date:"M d, Y H:i" }}</p>
 
           {% if user.is_authenticated and user == comment.author %}
             <p class="actions">
@@ -37,6 +48,7 @@
 
 <hr>
 
+<!-- ✍️ Add Comment Form -->
 <section id="add-comment">
   <h3>Leave a comment</h3>
 

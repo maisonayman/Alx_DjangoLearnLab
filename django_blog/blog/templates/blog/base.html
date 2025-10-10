@@ -13,9 +13,21 @@
             <ul>
                 <li><a href="{% url 'home' %}">Home</a></li>
                 <li><a href="{% url 'posts' %}">Blog Posts</a></li>
-                <li><a href="{% url 'login' %}">Login</a></li>
-                <li><a href="{% url 'register' %}">Register</a></li>
+
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                    <li><a href="{% url 'profile' %}">Profile</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'register' %}">Register</a></li>
+                {% endif %}
             </ul>
+
+            <!-- 🔍 Search bar -->
+            <form method="get" action="{% url 'post-search' %}" class="search-form">
+                <input type="text" name="q" placeholder="Search posts..." required>
+                <button type="submit">Search</button>
+            </form>
         </nav>
     </header>
 
