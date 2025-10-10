@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from taggit.forms import TagWidget
 from .models import Post, Comment
 
 
@@ -20,29 +21,12 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class PostForm(forms.ModelForm):
-    # Taggit automatically handles tags as a TaggableManager
-    tags = forms.CharField(
-        required=False,
-        help_text="Enter tags separated by commas (e.g. travel, lifestyle, tech)",
-        widget=forms.TextInput(attrs={'placeholder': 'Add tags separated by commas'})
-    )
-
     class Meta:
         model = Post
         fields = ['title', 'content', 'tags']
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if commit:
-            instance.save()
-
-        # Clear old tags and re-add new ones
-        instance.tags.clear()
-        tags_str = self.cleaned_data.get('tags', '')
-        tag_names = [t.strip() for t in tags_str.split(',') if t.strip()]
-        instance.tags.add(*tag_names)
-
-        return instance
+        widgets = {
+            'tags': TagWidget(),  
+        }
 
 
 class CommentForm(forms.ModelForm):
