@@ -6,7 +6,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from .forms import CustomUserCreationForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import Post, Comment, Tag
+from .models import Post, Comment
 from .forms import PostForm
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
