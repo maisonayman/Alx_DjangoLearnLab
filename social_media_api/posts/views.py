@@ -1,10 +1,13 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, filters
-from .models import Post, Comment
+from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
 
 # Create your views here.
 
@@ -42,3 +45,44 @@ def user_feed(request):
     posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
     serializer = PostSerializer(posts, many=True)
     return Response(serializer.data)
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def like_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    user = request.user
+
+    # Check if already liked
+    if Like.objects.filter(post=post, user=user).exists():
+        return Response({'message': 'You already liked this post.'}, status=400)
+
+    # Create like
+    Like.objects.create(post=post, user=user)
+
+    # Create notification
+    Notification.objects.create(
+        recipient=post.author,
+        actor=user,
+        verb='liked your post',
+        target_content_type=ContentType.objects.get_for_model(post),
+        target_object_id=post.id
+    )
+
+    return Response({'message': 'Post liked successfully.'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def unlike_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    user = request.user
+
+    like = Like.objects.filter(post=post, user=user).first()
+    if not like:
+        return Response({'message': 'You have not liked this post.'}, status=400)
+
+    like.delete()
+    return Response({'message': 'Post unliked successfully.'})
