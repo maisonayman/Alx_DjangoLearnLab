@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from notifications.models import Notification
 from django.contrib.contenttypes.models import ContentType
+from rest_framework import generics, status
 
 # Create your views here.
 
@@ -48,41 +49,22 @@ def user_feed(request):
 
 
 
+class LikePostView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def like_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    user = request.user
+    def post(self, request, pk):
+        post = generics.get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
 
-    # Check if already liked
-    if Like.objects.filter(post=post, user=user).exists():
-        return Response({'message': 'You already liked this post.'}, status=400)
-
-    # Create like
-    Like.objects.create(post=post, user=user)
-
-    # Create notification
-    Notification.objects.create(
-        recipient=post.author,
-        actor=user,
-        verb='liked your post',
-        target_content_type=ContentType.objects.get_for_model(post),
-        target_object_id=post.id
-    )
-
-    return Response({'message': 'Post liked successfully.'})
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def unlike_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    user = request.user
-
-    like = Like.objects.filter(post=post, user=user).first()
-    if not like:
-        return Response({'message': 'You have not liked this post.'}, status=400)
-
-    like.delete()
-    return Response({'message': 'Post unliked successfully.'})
+        if created:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                target_content_type=ContentType.objects.get_for_model(post),
+                target_object_id=post.id
+            )
+            return Response({"message": "Post liked"}, status=status.HTTP_201_CREATED)
+        else:
+            like.delete()
+            return Response({"message": "Post unliked"}, status=status.HTTP_200_OK)
