@@ -63,13 +63,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'social_media_api.wsgi.application'
 
-
-# DATABASE (PostgreSQL via dj_database_url)
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'social_db',
+        'USER': 'postgres',
+        'PASSWORD': 'my@password',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
 
